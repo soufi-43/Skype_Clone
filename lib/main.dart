@@ -14,11 +14,13 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
+  FirebaseRespository _repository  = FirebaseRespository();
+
 
   @override
   Widget build(BuildContext context) {
 
-    FirebaseRespository _repository  = FirebaseRespository();
+
 
 
     return MaterialApp(
