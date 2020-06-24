@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:skypeclone/screens/pageviews/chat_list.dart';
 import 'package:skypeclone/utils/universal_variables.dart';
 import 'package:flutter/cupertino.dart';
 
@@ -36,8 +37,9 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: UniversalVariables.blackColor,
       body: PageView(
         children: <Widget>[
-          Center(
-            child: Text('Chat List Screen',style: TextStyle(color: Colors.white),),
+          Container(
+            child: ChatListScreen(),
+
           ),
           Center(
             child: Text('Call Logs',style: TextStyle(color: Colors.white),),
