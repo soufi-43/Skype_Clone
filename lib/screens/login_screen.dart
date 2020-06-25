@@ -12,7 +12,7 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  FirebaseRespository _repository = FirebaseRespository();
+  FirebaseRepository _repository = FirebaseRepository();
 
   bool isLoginPressed = false;
 

@@ -12,7 +12,7 @@ class ChatListScreen extends StatefulWidget {
   _ChatListScreenState createState() => _ChatListScreenState();
 }
 
-final FirebaseRespository _respository = FirebaseRespository();
+final FirebaseRepository _respository = FirebaseRepository();
 
 class _ChatListScreenState extends State<ChatListScreen> {
   String currentUserId;
@@ -47,7 +47,9 @@ class _ChatListScreenState extends State<ChatListScreen> {
             Icons.search,
             color: Colors.white,
           ),
-          onPressed: () {},
+          onPressed: () {
+            Navigator.pushNamed(context,"/search_screen");
+          },
         ),
         IconButton(
           icon: Icon(
