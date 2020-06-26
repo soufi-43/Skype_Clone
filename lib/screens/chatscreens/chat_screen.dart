@@ -1,6 +1,9 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:skypeclone/models/message.dart';
 import 'package:skypeclone/models/user.dart';
+import 'package:skypeclone/resources/firebase_repository.dart';
 import 'package:skypeclone/utils/universal_variables.dart';
 import 'package:skypeclone/widgets/appBar.dart';
 import 'package:skypeclone/widgets/custom_tile.dart';
@@ -16,7 +19,30 @@ class ChatScreen extends StatefulWidget {
 
 class _ChatScreenState extends State<ChatScreen> {
   TextEditingController textFieldController = TextEditingController();
+  FirebaseRepository _repository = FirebaseRepository();
+
+  String _currentUserId;
+
+  User sender;
+
   bool isWriting = false;
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    _repository.getCurrentUser().then((user) {
+      _currentUserId = user.uid;
+
+      setState(() {
+        sender = User(
+          uid: user.uid,
+          name: user.displayName,
+          profilePhoto: user.photoUrl,
+        );
+      });
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -35,25 +61,43 @@ class _ChatScreenState extends State<ChatScreen> {
   }
 
   Widget messageList() {
-    return ListView.builder(
-        padding: EdgeInsets.all(10),
-        itemCount: 6,
-        itemBuilder: (context, index) {
-          return chatMessageItem();
-        });
+    return StreamBuilder(
+      stream: Firestore.instance
+          .collection("messages")
+          .document(_currentUserId)
+          .collection(widget.receiver.uid)
+          .orderBy("timestamp", descending: true)
+          .snapshots(),
+      builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
+        if (snapshot.data == null) {
+          return Center(child: CircularProgressIndicator());
+        }
+        return ListView.builder(
+          padding: EdgeInsets.all(10),
+          itemCount: snapshot.data.documents.length,
+          itemBuilder: (context, index) {
+            return chatMessageItem(snapshot.data.documents[index]);
+          },
+        );
+      },
+    );
   }
 
-  Widget chatMessageItem() {
+  Widget chatMessageItem(DocumentSnapshot snapshot) {
     return Container(
       margin: EdgeInsets.symmetric(vertical: 15),
       child: Container(
-        alignment: Alignment.centerRight,
-        child: senderLayout(),
+        alignment: snapshot['senderId'] == _currentUserId
+            ? Alignment.centerRight
+            : Alignment.centerLeft,
+        child: snapshot['senderId'] == _currentUserId
+            ? senderLayout(snapshot)
+            : receiverLayout(snapshot),
       ),
     );
   }
 
-  Widget senderLayout() {
+  Widget senderLayout(DocumentSnapshot snapshot) {
     Radius messageRadius = Radius.circular(10);
     return Container(
       margin: EdgeInsets.only(top: 12),
@@ -70,18 +114,23 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       child: Padding(
         padding: EdgeInsets.all(10),
-        child: Text(
-          "Hello",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
+        child: getMessage(snapshot),
       ),
     );
   }
 
-  Widget receiverLayout() {
+  getMessage(DocumentSnapshot snapshot) {
+    print(snapshot['message']);
+    return Text(
+      snapshot['message'],
+      style: TextStyle(
+        color: Colors.white,
+        fontSize: 16.0,
+      ),
+    );
+  }
+
+  Widget receiverLayout(DocumentSnapshot snapshot) {
     Radius messageRadius = Radius.circular(10);
     return Container(
       margin: EdgeInsets.only(top: 12),
@@ -98,13 +147,7 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
       child: Padding(
         padding: EdgeInsets.all(10),
-        child: Text(
-          "Hello",
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 16,
-          ),
-        ),
+        child: getMessage(snapshot),
       ),
     );
   }
@@ -204,9 +247,9 @@ class _ChatScreenState extends State<ChatScreen> {
                 color: Colors.white,
               ),
               onChanged: (val) {
-                if (val.length > 0 && val.trim() != ""
+                (val.length > 0 && val.trim() != "")
                     ? setWriting(true)
-                    : setWriting(false)) ;
+                    : setWriting(false);
               },
               decoration: InputDecoration(
                 hintText: 'Type a message',
@@ -248,12 +291,29 @@ class _ChatScreenState extends State<ChatScreen> {
                       Icons.send,
                       size: 15,
                     ),
-                    onPressed: () => {},
+                    onPressed: () => sendMessage(),
                   ))
               : Container(),
         ],
       ),
     );
+  }
+
+  sendMessage() {
+    var text = textFieldController.text;
+    Message _message = Message(
+      receiverId: widget.receiver.uid,
+      senderId: sender.uid,
+      message: text,
+      timestamp: FieldValue.serverTimestamp(),
+      type: 'text',
+    );
+
+    setState(() {
+      isWriting = false;
+    });
+
+    _repository.addMessageToDb(_message, sender, widget.receiver);
   }
 
   CustomAppBar customAppBar(BuildContext context) {
