@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:skypeclone/provider/image_upload_provider.dart';
 import 'package:skypeclone/provider/user_provider.dart';
+import 'package:skypeclone/resources/auth_methods.dart';
 import 'package:skypeclone/resources/firebase_repository.dart';
 import 'package:skypeclone/screens/home_screen.dart';
 import 'package:skypeclone/screens/login_screen.dart';
@@ -18,8 +19,7 @@ class MyApp extends StatefulWidget {
 }
 
 class _MyAppState extends State<MyApp> {
-  FirebaseRepository _repository  = FirebaseRepository();
-
+  final AuthMethods _authMethods = AuthMethods();
 
   @override
   Widget build(BuildContext context) {
@@ -40,7 +40,7 @@ class _MyAppState extends State<MyApp> {
           brightness: Brightness.dark,
         ),
         home: FutureBuilder(
-            future:  _repository.getCurrentUser(),
+            future:  _authMethods.getCurrentUser(),
             builder: (context,AsyncSnapshot<FirebaseUser> snapshot){
               if(snapshot.hasData){
                 print(snapshot) ;

@@ -1,7 +1,9 @@
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'package:skypeclone/resources/auth_methods.dart';
 import 'package:skypeclone/resources/firebase_repository.dart';
+import 'package:skypeclone/screens/pickup/pickup_layout.dart';
 import 'package:skypeclone/utils/universal_variables.dart';
 import 'package:skypeclone/utils/utilities.dart';
 import 'package:skypeclone/widgets/appBar.dart';
@@ -12,17 +14,16 @@ class ChatListScreen extends StatefulWidget {
   _ChatListScreenState createState() => _ChatListScreenState();
 }
 
-final FirebaseRepository _respository = FirebaseRepository();
-
 class _ChatListScreenState extends State<ChatListScreen> {
+  final AuthMethods _authMethods = AuthMethods();
+
   String currentUserId;
-  String initials;
+  String initials = "";
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
-    _respository.getCurrentUser().then((user) {
+    _authMethods.getCurrentUser().then((user) {
       setState(() {
         currentUserId = user.uid;
         initials = Utils.getInitials(user.displayName);
@@ -39,7 +40,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
         ),
         onPressed: () {},
       ),
-      title: UserCircle(initials==null?"" :initials),
+      title: UserCircle(initials),
       centerTitle: true,
       actions: <Widget>[
         IconButton(
@@ -48,7 +49,7 @@ class _ChatListScreenState extends State<ChatListScreen> {
             color: Colors.white,
           ),
           onPressed: () {
-            Navigator.pushNamed(context,"/search_screen");
+            Navigator.pushNamed(context, "/search_screen");
           },
         ),
         IconButton(
@@ -58,24 +59,25 @@ class _ChatListScreenState extends State<ChatListScreen> {
           ),
           onPressed: () {},
         ),
-
       ],
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: UniversalVariables.blackColor,
-      appBar: customAppBar(context),
-      floatingActionButton: NewChatButton(),
-      body: ChatListContainer(currentUserId),
+    return PickupLayout(
+      scaffold: Scaffold(
+        backgroundColor: UniversalVariables.blackColor,
+        appBar: customAppBar(context),
+        floatingActionButton: NewChatButton(),
+        body: ChatListContainer(currentUserId),
+      ),
     );
   }
 }
 
 class ChatListContainer extends StatefulWidget {
-  String currentUserId;
+  final String currentUserId;
 
   ChatListContainer(this.currentUserId);
 
@@ -95,15 +97,12 @@ class _ChatListContainerState extends State<ChatListContainer> {
             mini: false,
             onTap: () {},
             title: Text(
-              'The CS Guy',
+              "The CS Guy",
               style: TextStyle(
-                color: Colors.white,
-                fontFamily: "Arial",
-                fontSize: 19,
-              ),
+                  color: Colors.white, fontFamily: "Arial", fontSize: 19),
             ),
             subtitle: Text(
-              'Hello',
+              "Hello",
               style: TextStyle(
                 color: UniversalVariables.greyColor,
                 fontSize: 14,
@@ -125,15 +124,12 @@ class _ChatListContainerState extends State<ChatListContainer> {
                       height: 13,
                       width: 13,
                       decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: UniversalVariables.onlineDotColor,
-                        border: Border.all(
-                          color: UniversalVariables.blackColor,
-                          width: 2,
-                        ),
-                      ),
+                          shape: BoxShape.circle,
+                          color: UniversalVariables.onlineDotColor,
+                          border: Border.all(
+                              color: UniversalVariables.blackColor, width: 2)),
                     ),
-                  ),
+                  )
                 ],
               ),
             ),
@@ -152,11 +148,12 @@ class UserCircle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 40,
       height: 40,
+      width: 40,
       decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(50),
-          color: UniversalVariables.separatorColor),
+        borderRadius: BorderRadius.circular(50),
+        color: UniversalVariables.separatorColor,
+      ),
       child: Stack(
         children: <Widget>[
           Align(
@@ -165,8 +162,8 @@ class UserCircle extends StatelessWidget {
               text,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
-                fontSize: 13,
                 color: UniversalVariables.lightBlueColor,
+                fontSize: 13,
               ),
             ),
           ),
@@ -176,15 +173,12 @@ class UserCircle extends StatelessWidget {
               height: 12,
               width: 12,
               decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                border: Border.all(
-                  color: UniversalVariables.blackColor,
-                  width: 2,
-                ),
-                color: UniversalVariables.onlineDotColor,
-              ),
+                  shape: BoxShape.circle,
+                  border: Border.all(
+                      color: UniversalVariables.blackColor, width: 2),
+                  color: UniversalVariables.onlineDotColor),
             ),
-          ),
+          )
         ],
       ),
     );
@@ -196,9 +190,8 @@ class NewChatButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: BoxDecoration(
-        gradient: UniversalVariables.fabGradient,
-        borderRadius: BorderRadius.circular(50),
-      ),
+          gradient: UniversalVariables.fabGradient,
+          borderRadius: BorderRadius.circular(50)),
       child: Icon(
         Icons.edit,
         color: Colors.white,

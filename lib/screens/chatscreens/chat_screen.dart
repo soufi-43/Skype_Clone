@@ -12,7 +12,10 @@ import 'package:skypeclone/enum/view_state.dart';
 import 'package:skypeclone/models/message.dart';
 import 'package:skypeclone/models/user.dart';
 import 'package:skypeclone/provider/image_upload_provider.dart';
+import 'package:skypeclone/resources/auth_methods.dart';
+import 'package:skypeclone/resources/chat_methods.dart';
 import 'package:skypeclone/resources/firebase_repository.dart';
+import 'package:skypeclone/resources/storage_methods.dart';
 import 'package:skypeclone/screens/widgets/cached_image.dart';
 import 'package:skypeclone/utils/call_utilities.dart';
 import 'package:skypeclone/utils/permissions.dart';
@@ -34,7 +37,9 @@ class _ChatScreenState extends State<ChatScreen> {
   TextEditingController textFieldController = TextEditingController();
   FocusNode textFieldFocus = FocusNode();
 
-  FirebaseRepository _repository = FirebaseRepository();
+  final StorageMethods _storageMethods = StorageMethods();
+  final ChatMethods _chatMethods = ChatMethods();
+  final AuthMethods _authMethods = AuthMethods();
 
   ScrollController _listScrollController = ScrollController();
 
@@ -51,7 +56,7 @@ class _ChatScreenState extends State<ChatScreen> {
   @override
   void initState() {
     super.initState();
-    _repository.getCurrentUser().then((user) {
+    _authMethods.getCurrentUser().then((user) {
       _currentUserId = user.uid;
 
       setState(() {
@@ -337,7 +342,7 @@ class _ChatScreenState extends State<ChatScreen> {
 
       textFieldController.text = "";
 
-      _repository.addMessageToDb(_message, sender, widget.receiver);
+      _chatMethods.addMessageToDb(_message, sender, widget.receiver);
     }
 
     return Container(
@@ -442,9 +447,9 @@ class _ChatScreenState extends State<ChatScreen> {
 
   void pickImage({@required ImageSource source}) async {
     File selectedImage = await Utils.pickImage(source: source);
-    _repository.uploadImage(
+    _storageMethods.uploadImage(
         image: selectedImage,
-        receivedId: widget.receiver.uid,
+        receiverId: widget.receiver.uid,
         senderId: _currentUserId,
         imageUploadProvider: _imageUploadProvider);
   }

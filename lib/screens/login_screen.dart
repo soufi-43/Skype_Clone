@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:skypeclone/resources/auth_methods.dart';
 
 import 'package:skypeclone/resources/firebase_repository.dart';
 import 'package:skypeclone/screens/home_screen.dart';
@@ -8,11 +9,11 @@ import 'package:skypeclone/utils/universal_variables.dart';
 
 class LoginScreen extends StatefulWidget {
   @override
-  _LoginScreenState createState() => _LoginScreenState();
+  LoginScreenState createState() => LoginScreenState();
 }
 
-class _LoginScreenState extends State<LoginScreen> {
-  FirebaseRepository _repository = FirebaseRepository();
+class LoginScreenState extends State<LoginScreen> {
+  final AuthMethods _authMethods = AuthMethods();
 
   bool isLoginPressed = false;
 
@@ -23,81 +24,69 @@ class _LoginScreenState extends State<LoginScreen> {
       body: Stack(
         children: [
           Center(
-            child: LoginButton(),
+            child: loginButton(),
           ),
           isLoginPressed
               ? Center(
-                  child: CircularProgressIndicator(),
-                )
-              : Container(),
+            child: CircularProgressIndicator(),
+          )
+              : Container()
         ],
       ),
     );
   }
 
-  Widget LoginButton() {
+  Widget loginButton() {
     return Shimmer.fromColors(
       baseColor: Colors.white,
       highlightColor: UniversalVariables.senderColor,
       child: FlatButton(
         padding: EdgeInsets.all(35),
-        onPressed: () => performLogin(),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(10),
-        ),
         child: Text(
-          'LOGIN',
+          "LOGIN",
           style: TextStyle(
-            fontSize: 35,
-            fontWeight: FontWeight.w900,
-            letterSpacing: 1.2,
-          ),
+              fontSize: 35, fontWeight: FontWeight.w900, letterSpacing: 1.2),
         ),
+        onPressed: () => performLogin(),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
       ),
     );
   }
 
   void performLogin() {
+    print("tring to perform login");
 
     setState(() {
-      isLoginPressed = true ;
+      isLoginPressed = true;
     });
 
-
-    _repository.signIn().then((FirebaseUser user) {
+    _authMethods.signIn().then((FirebaseUser user) {
       if (user != null) {
         authenticateUser(user);
       } else {
-        print('there is an error');
+        print("There was an error");
       }
     });
   }
 
   void authenticateUser(FirebaseUser user) {
-    _repository.authenticateUser(user).then((isNewUser) {
+    _authMethods.authenticateUser(user).then((isNewUser) {
       setState(() {
-        isLoginPressed = false ;
+        isLoginPressed = false;
       });
+
       if (isNewUser) {
-        _repository.addDataToDb(user).then((value) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(
-              builder: (context) {
+        _authMethods.addDataToDb(user).then((value) {
+          Navigator.pushReplacement(context,
+              MaterialPageRoute(builder: (context) {
                 return HomeScreen();
-              },
-            ),
-          );
+              }));
         });
       } else {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (context) {
+        Navigator.pushReplacement(context,
+            MaterialPageRoute(builder: (context) {
               return HomeScreen();
-            },
-          ),
-        );
+            }));
       }
     });
   }
