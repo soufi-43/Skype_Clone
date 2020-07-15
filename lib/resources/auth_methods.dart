@@ -1,10 +1,12 @@
 import 'dart:io';
 
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:skypeclone/constatnts/strings.dart';
+import 'package:skypeclone/enum/user_state.dart';
 import 'package:skypeclone/models/user.dart';
 import 'package:skypeclone/utils/utilities.dart';
 
@@ -16,7 +18,7 @@ class AuthMethods {
   static final Firestore firestore = Firestore.instance;
 
   static final CollectionReference _userCollection =
-  _firestore.collection(USERS_COLLECTION);
+      _firestore.collection(USERS_COLLECTION);
 
   Future<FirebaseUser> getCurrentUser() async {
     FirebaseUser currentUser;
@@ -28,15 +30,26 @@ class AuthMethods {
     FirebaseUser currentUser = await getCurrentUser();
 
     DocumentSnapshot documentSnapshot =
-    await _userCollection.document(currentUser.uid).get();
+        await _userCollection.document(currentUser.uid).get();
 
     return User.fromMap(documentSnapshot.data);
+  }
+
+  Future<User> getUserDetailsById(id) async {
+    try {
+      DocumentSnapshot documentSnapshot =
+          await _userCollection.document(id).get();
+      return User.fromMap(documentSnapshot.data);
+    } catch (e) {
+      print(e);
+      return null;
+    }
   }
 
   Future<FirebaseUser> signIn() async {
     GoogleSignInAccount _signInAccount = await _googleSignIn.signIn();
     GoogleSignInAuthentication _signInAuthentication =
-    await _signInAccount.authentication;
+        await _signInAccount.authentication;
 
     final AuthCredential credential = GoogleAuthProvider.getCredential(
         idToken: _signInAuthentication.idToken,
@@ -80,7 +93,7 @@ class AuthMethods {
     List<User> userList = List<User>();
 
     QuerySnapshot querySnapshot =
-    await firestore.collection(USERS_COLLECTION).getDocuments();
+        await firestore.collection(USERS_COLLECTION).getDocuments();
     for (var i = 0; i < querySnapshot.documents.length; i++) {
       if (querySnapshot.documents[i].documentID != currentUser.uid) {
         userList.add(User.fromMap(querySnapshot.documents[i].data));
@@ -93,4 +106,18 @@ class AuthMethods {
     await _googleSignIn.signOut();
     return await _auth.signOut();
   }
+
+
+  void setUserState({@required String userId , @required UserState userState}){
+    int stateNum = Utils.stateToNum(userState) ;
+
+    _userCollection.document(userId).updateData({
+      'state':stateNum ,
+    });
+
+
+  }
+
+  Stream<DocumentSnapshot> getUserStream({@required String uid})=>
+      _userCollection.document(uid).snapshots() ; 
 }
