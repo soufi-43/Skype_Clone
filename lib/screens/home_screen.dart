@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import 'package:skypeclone/enum/user_state.dart';
 import 'package:skypeclone/provider/user_provider.dart';
 import 'package:skypeclone/resources/auth_methods.dart';
-import 'package:skypeclone/screens/pageviews/chat_list_screen.dart';
+import 'package:skypeclone/screens/pageviews/chats/chat_list_screen.dart';
+import 'package:skypeclone/screens/pageviews/logs/widgets/log_screen.dart';
 import 'package:skypeclone/screens/pickup/pickup_layout.dart';
 import 'package:skypeclone/utils/universal_variables.dart';
 import 'package:flutter/cupertino.dart';
@@ -29,9 +30,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       userProvider = Provider.of<UserProvider>(context, listen: false);
 
       await userProvider.refreshUser();
-      _authMethods.setUserState(userId: userProvider.getUser.uid, userState: UserState.Online) ;
-
-
+      _authMethods.setUserState(
+          userId: userProvider.getUser.uid, userState: UserState.Online);
     });
 
     WidgetsBinding.instance.addObserver(this);
@@ -66,20 +66,20 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       case AppLifecycleState.inactive:
         currentUserId != null
             ? _authMethods.setUserState(
-            userId: currentUserId, userState: UserState.Offline)
+                userId: currentUserId, userState: UserState.Offline)
             : print("inactive state");
         break;
       case AppLifecycleState.paused:
         currentUserId != null
             ? _authMethods.setUserState(
-            userId: currentUserId, userState: UserState.Waiting)
+                userId: currentUserId, userState: UserState.Waiting)
             : print("paused state");
         // TODO: Handle this case.
         break;
       case AppLifecycleState.detached:
         currentUserId != null
             ? _authMethods.setUserState(
-            userId: currentUserId, userState: UserState.Offline)
+                userId: currentUserId, userState: UserState.Offline)
             : print("detached state");
         break;
     }
@@ -103,15 +103,8 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
         backgroundColor: UniversalVariables.blackColor,
         body: PageView(
           children: <Widget>[
-            Container(
-              child: ChatListScreen(),
-            ),
-            Center(
-              child: Text(
-                'Call Logs',
-                style: TextStyle(color: Colors.white),
-              ),
-            ),
+            ChatListScreen(),
+            LogScreen(),
             Center(
               child: Text(
                 'Contact Screen',
