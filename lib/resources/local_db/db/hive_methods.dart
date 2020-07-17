@@ -4,7 +4,7 @@ import 'package:skypeclone/resources/local_db/interface/log_interface.dart';
 class HiveMethods implements LogInterface {
   @override
   addLogs(Log log) {
-    print('adding values to hive db')
+    print('adding values to hive db');
     return null;
   }
 
