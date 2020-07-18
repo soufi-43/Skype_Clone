@@ -114,6 +114,6 @@ class SqliteMethods implements LogInterface {
   @override
   close() async{
     var dbClient  = await db ;
-    dbClient.close() ; 
+    dbClient.close() ;
   }
 }
