@@ -1,17 +1,50 @@
 import 'package:flutter/material.dart';
+import 'package:skypeclone/constatnts/strings.dart';
 import 'package:skypeclone/models/call.dart';
+import 'package:skypeclone/models/log.dart';
 import 'package:skypeclone/resources/call_methods.dart';
+import 'package:skypeclone/resources/local_db/repository/log_respository.dart';
 import 'package:skypeclone/screens/callscreens/call_screen.dart';
 import 'package:skypeclone/screens/widgets/cached_image.dart';
 import 'package:skypeclone/utils/permissions.dart';
 
-class PickupScreen extends StatelessWidget {
+class PickupScreen extends StatefulWidget {
   final Call call;
-  final CallMethods callMethods = CallMethods();
 
   PickupScreen({
     @required this.call,
   });
+
+  @override
+  _PickupScreenState createState() => _PickupScreenState();
+}
+
+class _PickupScreenState extends State<PickupScreen> {
+  final CallMethods callMethods = CallMethods();
+
+  bool isCallMissed = true ;
+
+  //add logs in db
+  addToLocalStorage({@required String callStatus}) {
+    Log log = Log(
+      callerName: widget.call.callerName,
+      callerPic: widget.call.callerPic,
+      receiverName: widget.call.receiverName,
+      receiverPic: widget.call.receiverPic,
+      timestamp: DateTime.now().toString(),
+      callStatus: callStatus,
+    );
+    LogRepository.addLogs(log);
+  }
+
+  @override
+  void dispose() {
+    // TODO: implement dispose
+    super.dispose();
+    if(isCallMissed){
+      addToLocalStorage(callStatus: CALL_STATUS_MISSED);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -30,13 +63,13 @@ class PickupScreen extends StatelessWidget {
             ),
             SizedBox(height: 50),
             CachedImage(
-              call.callerPic,
+              widget.call.callerPic,
               isRound: true,
               radius: 180,
             ),
             SizedBox(height: 15),
             Text(
-              call.callerName,
+              widget.call.callerName,
               style: TextStyle(
                 fontWeight: FontWeight.bold,
                 fontSize: 20,
@@ -50,22 +83,31 @@ class PickupScreen extends StatelessWidget {
                   icon: Icon(Icons.call_end),
                   color: Colors.redAccent,
                   onPressed: () async {
-                    await callMethods.endCall(call: call);
+                    isCallMissed = false ;
+                    addToLocalStorage(callStatus: CALL_STATUS_RECEIVED) ;
+                    await callMethods.endCall(call: widget.call);
                   },
                 ),
                 SizedBox(width: 25),
                 IconButton(
                   icon: Icon(Icons.call),
                   color: Colors.green,
-                  onPressed: () async =>
-                      await Permissions.cameraAndMicrophonePermissionsGranted()
+                  onPressed: () async {
+
+                    isCallMissed = false ;
+
+                    addToLocalStorage(callStatus: CALL_STATUS_RECEIVED) ;
+
+                    await Permissions.cameraAndMicrophonePermissionsGranted()
                           ? Navigator.push(
                               context,
                               MaterialPageRoute(
-                                builder: (context) => CallScreen(call: call),
+                                builder: (context) =>
+                                    CallScreen(call: widget.call),
                               ),
                             )
-                          : {},
+                          : {};
+                  },
                 ),
               ],
             ),

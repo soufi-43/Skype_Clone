@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:skypeclone/enum/user_state.dart';
 import 'package:skypeclone/provider/user_provider.dart';
 import 'package:skypeclone/resources/auth_methods.dart';
+import 'package:skypeclone/resources/local_db/repository/log_respository.dart';
 import 'package:skypeclone/screens/pageviews/chats/chat_list_screen.dart';
 import 'package:skypeclone/screens/pageviews/logs/widgets/log_screen.dart';
 import 'package:skypeclone/screens/pickup/pickup_layout.dart';
@@ -32,6 +33,7 @@ class _HomeScreenState extends State<HomeScreen> with WidgetsBindingObserver {
       await userProvider.refreshUser();
       _authMethods.setUserState(
           userId: userProvider.getUser.uid, userState: UserState.Online);
+      LogRepository.init(isHive: false,dbName: userProvider.getUser.uid) ;
     });
 
     WidgetsBinding.instance.addObserver(this);

@@ -7,7 +7,7 @@ import 'package:skypeclone/resources/local_db/interface/log_interface.dart';
 
 class HiveMethods implements LogInterface {
 
-  String hive_box = "Call_Logs" ;
+  String hive_box = "" ;
   @override
   init() async{
     Directory dir = await getApplicationDocumentsDirectory() ;
@@ -62,6 +62,10 @@ class HiveMethods implements LogInterface {
 
     }
     return logList ;
+  }
+
+  @override
+  openDb(dbName) =>(hive_box = dbName) ;
   }
 
 

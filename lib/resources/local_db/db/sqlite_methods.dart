@@ -9,7 +9,7 @@ import 'package:path/path.dart';
 class SqliteMethods implements LogInterface {
   Database _db;
 
-  String databaseName = 'logDB';
+  String databaseName="" ;
 
   String tableName = 'Call_Logs';
 
@@ -74,7 +74,7 @@ class SqliteMethods implements LogInterface {
       tableName,
       log.toMap(log),
       where: '$id = ?',
-      whereArgs: [log.logId],
+      whereArgs: [log.logId+1],
     );
   }
 
@@ -116,4 +116,7 @@ class SqliteMethods implements LogInterface {
     var dbClient  = await db ;
     dbClient.close() ;
   }
+
+  @override
+  openDb(dbName) =>(databaseName = dbName) ;
 }
